@@ -1,0 +1,26 @@
+<launch>
+
+  <arg name="use_gui" default="true"/>
+  <arg name="rviz_config" default="$(find rbx1_description)/rviz/urdf.rviz" />
+  <param name="robot_description" textfile="$(find rbx1_description)/urdf/rbx1.urdf" />
+
+  <node name="joint_state_publisher" 
+    pkg="joint_state_publisher"
+    type="joint_state_publisher"
+    unless="$(arg use_gui)"/>
+
+  <node name="joint_state_publisher"
+    pkg="joint_state_publisher_gui"
+    type="joint_state_publisher_gui"
+    if="$(arg use_gui)"/>
+
+  <node name="robot_state_publisher"
+    pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+  <node name="rviz"
+    pkg="rviz"
+    type="rviz"
+    args="-d $(arg rviz_config)"
+    required="true"/>
+</launch>

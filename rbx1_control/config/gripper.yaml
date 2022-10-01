@@ -1,0 +1,4 @@
+type: "position_controllers/JointGroupPositionController"
+joints:
+ - gripper_servo_gear_joint
+ - gripper_idol_gear_joint

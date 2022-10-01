@@ -1,0 +1,8 @@
+type: "position_controllers/JointGroupPositionController"
+joints:
+ - joint_1_base_shoulder
+ - joint_2_shoulder_arm
+ - joint_3_arm_upper_forearm
+ - joint_4_upper_forearm_forearm
+ - joint_5_forearm_wrist
+ - joint_6_wrist_hand

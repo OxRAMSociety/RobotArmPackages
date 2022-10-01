@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <include file="$(find rbx1_moveit_config)/launch/demo.launch"/>
+
+  <node name="rbx1MoveItCommander" pkg="rbx1_scripts" type="rbx1MoveItCommander.py" respawn="false" output="screen"/>
+
+</launch>
