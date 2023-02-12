@@ -4,5 +4,12 @@
   <include file="$(find rbx1_moveit_config)/launch/demo.launch"/>
 
   <node name="rbx1MoveItCommander" pkg="rbx1_scripts" type="rbx1MoveItCommander.py" respawn="false" output="screen"/>
-
+  <node name="UsbCam" pkg="usb_cam" type="usb_cam_node" respawn="false" output="screen">
+    <param name="_image_width" value="1280" type="integer"/>
+    <arg name="_image_height" value="720" type="integer"/>
+    <arg name="_video_device" value="/dev/video2" type="string"/>
+    <arg name="/usb_cam" value"/camera/color"/>
+  </node>
+  <node name="tag0_broadcaster" pkg="tf2_ros" type="static_transform_publisher" args="0.0 0.0 0.0 0.0 0.0 0.0 map tag0"/>
+  <node name=/>
 </launch>
