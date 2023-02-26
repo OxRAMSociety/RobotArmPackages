@@ -3,12 +3,11 @@
 
 import rospy
 import smach
-from geometry_msgs.msg import Pose
-import smach_ros
-import tf2_ros
 
-from GetPose import GetPose
 
+
+from rbx1_GetPose import GetPose
+from rbx1_MoveArm import MOVE_ARM
 
 
 
@@ -43,7 +42,7 @@ class CheckTarget(smach.State):
 if __name__ == '__main__':
     rospy.init_node("State_Machine_1.0")
 
-    sm = smach.StateMachine(outcomes=['end'])
+    sm = smach.StateMachine(outcomes=['success','fail'])
 
     # Open the container
     with sm:
@@ -53,12 +52,13 @@ if __name__ == '__main__':
         smach.StateMachine.add('Idle', Idle(), 
                                transitions={'Start':'GetPose', 'Stay Idle':'Idle'})
         smach.StateMachine.add('GetPose', GetPose(), 
-                               transitions={'success':'CheckTarget'},
+                               transitions={'success':'GetPose'},
                                remapping = {'pose' : 'pose'})
-        smach.StateMachine.add('CheckTarget',CheckTarget(),
-                                transitions= {'success' : 'end'},
-                                remapping = { 'pose' : 'pose',
-                                              'robot_pose' : 'robot_pose'})
+        smach.StateMachine.add('MoveArm',MOVE_ARM(),
+                               transitions= {'success' : 'success',
+                                             'failure' : 'fail'})
+
+      
 
     # Execute SMACH plan
     outcome = sm.execute()
