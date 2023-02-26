@@ -55,14 +55,14 @@ class rbx1MoveItCommander:
 
 	def query_acc_vel(self):
 		# Prompts the user for the max. acceleration and velocity scaling factors
-		a_scale = input("Max. Acceleration Scaling Factor? (0.1<=a<=1): ")
+		a_scale = float(input("Max. Acceleration Scaling Factor? (0.1<=a<=1): "))
 		if a_scale < 0.1:
 			a_scale = 0.1
 		elif a_scale > 1:
 			a_scale = 1
 		self.arm.set_max_acceleration_scaling_factor(a_scale)
 
-		v_scale = input("Max. Velocity Scaling Factor? (0.1<=v<=1): ")
+		v_scale = float(input("Max. Velocity Scaling Factor? (0.1<=v<=1): "))
 		if v_scale < 0.1:
 			v_scale = 0.1
 		elif v_scale > 1:
@@ -120,10 +120,10 @@ class rbx1MoveItCommander:
 
 		if result:
 			rospy.loginfo("SUCCESS - Executed Joint Goal!")
-			self._as.set_succeeded(executeJointGoalResult(result))
+			self.executeJointGoal_as.set_succeeded(executeJointGoalResult(result))
 		else:
 			rospy.logerr("FAILURE - Joint Goal Failed!")
-			self._as.set_aborted(executeJointGoalResult(result))
+			self.executeJointGoal_as.set_aborted(executeJointGoalResult(result))
 
 
 	def execute_pose_goal(self, pose_goal):
@@ -149,10 +149,10 @@ class rbx1MoveItCommander:
 
 		if result:
 			rospy.loginfo("SUCCESS - Executed Pose Goal!")
-			self._as.set_succeeded(executePoseGoalResult(result))
+			self.executePoseGoal_as.set_succeeded(executePoseGoalResult(result))
 		else:
 			rospy.logerr("FAILURE - Pose Goal Failed!")
-			self._as.set_aborted(executePoseGoalResult(result))
+			self.executePoseGoal_as.set_aborted(executePoseGoalResult(result))
 
 
 	def execute_position_goal(self, position_goal):
@@ -160,7 +160,7 @@ class rbx1MoveItCommander:
 		# I have found a lower bound for the locus of points to which the arm can always move, described by the following inequality:
 		#				~~~ x^2 + (y + 0.2425)^2 + (z - 0.1864)^2 <= 0.19717 ~~~
 		# If it's not working, check that your destination is achievable!
-		self.arm.set_position_target(position_goal, end_effector_link = self.eef_link)
+		self.arm.set_position_target(position_goal.data, end_effector_link = self.eef_link)
 		rospy.loginfo(position_goal)
 
 		# `go()` returns a boolean indicating whether the planning and execution was successful.
@@ -178,10 +178,10 @@ class rbx1MoveItCommander:
 
 		if result:
 			rospy.loginfo("SUCCESS - Executed Position Goal!")
-			self._as.set_succeeded(executePositionGoalResult(result))
+			self.executePositionGoal_as.set_succeeded(executePositionGoalResult(result))
 		else:
 			rospy.logerr("FAILURE - Position Goal Failed!")
-			self._as.set_aborted(executePositionGoalResult(result))
+			self.executePositionGoal_as.set_aborted(executePositionGoalResult(result))
 
 
 	def print_state(self):
