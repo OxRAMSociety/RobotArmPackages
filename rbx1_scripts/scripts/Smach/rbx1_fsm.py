@@ -7,7 +7,7 @@ import smach
 
 
 from rbx1_GetPose import GetPose
-from rbx1_MoveArm import MOVE_ARM
+from rbx1_movearmpose import MOVE_ARM
 
 
 
