@@ -15,4 +15,5 @@
     <arg name="image_topic" value="/color/image_raw"/>
   </include>
   <node name="tag_0_broadcaster" pkg="tf2_ros" type="static_transform_publisher" args="0.0 0.0 0.0 0.0 0.0 0.0 tag_0 world"/>
+  <node name="box_translation" pkg="tf2_ros" type="static_transform_publisher" args="0.0 0.0 -0.025 3.1415926 0.0 0.0 tag_1 box"/>
 </launch>
