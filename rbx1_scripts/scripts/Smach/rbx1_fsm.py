@@ -52,7 +52,7 @@ if __name__ == '__main__':
         smach.StateMachine.add('Idle', Idle(), 
                                transitions={'Start':'GetPose', 'Stay Idle':'Idle'})
         smach.StateMachine.add('GetPose', GetPose(), 
-                               transitions={'success':'GetPose'},
+                               transitions={'success':'MoveArm'},
                                remapping = {'pose' : 'pose'})
         smach.StateMachine.add('MoveArm',MOVE_ARM(),
                                transitions= {'success' : 'success',

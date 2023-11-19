@@ -14,12 +14,14 @@
 #
 # ### Syntax
 #
- standalone_tags:
-   [
-     {id: 0 , size: 0.032},
-     {id: 1 , size: 0.032},
-   ]
-
+# standalone_tags:
+#   [
+#     {id: ID, size: SIZE, name: NAME},
+#     ...
+#   ]
+standalone_tags:
+  [
+  ]
 # ## Tag bundle definitions
 # ### Remarks
 #
@@ -41,4 +43,6 @@
 #     },
 #     ...
 #   ]
-
+tag_bundles:
+  [
+  ]
