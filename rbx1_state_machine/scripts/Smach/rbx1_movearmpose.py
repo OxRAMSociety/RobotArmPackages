@@ -9,7 +9,6 @@ import time
 import smach
 
 
-import moveit_commander
 from moveit_msgs.msg import DisplayTrajectory
 from math import pi
 import math
