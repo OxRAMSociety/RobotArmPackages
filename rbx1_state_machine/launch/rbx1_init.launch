@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <include file="$(find rbx1_moveit_config)/launch/demo.launch"/>
+
+  <node name="rbx1MoveItCommander" pkg="rbx1_scripts" type="rbx1MoveItCommander.py" respawn="false" output="screen"/>
+  <node name="UsbCam" pkg="usb_cam" type="usb_cam_node" respawn="false" output="screen">
+    <param name="image_width" value="1280" type="int"/>
+    <param name="image_height" value="720" type="int"/>
+    <param name="video_device" value="/dev/video2" type="string"/>
+    <remap from="/UsbCam/image_raw" to="/camera/color/image_raw"/>
+  </node>
+  <include file="$(find apriltag_ros)/launch/continuous_detection.launch">
+    <arg name="camera_name" value="/camera"/>
+    <arg name="image_topic" value="/color/image_raw"/>
+  </include>
+  <node name="tag_0_broadcaster" pkg="tf2_ros" type="static_transform_publisher" args="0.0 0.0 0.0 0.0 0.0 0.0 tag_0 world"/>
+</launch>
