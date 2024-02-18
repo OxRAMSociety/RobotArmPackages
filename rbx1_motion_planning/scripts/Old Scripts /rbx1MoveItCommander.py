@@ -15,7 +15,7 @@ import math
 import geometry_msgs.msg
 from geometry_msgs.msg import Pose
 from actionlib import SimpleActionServer
-from rbx1_scripts.msg import executeJointGoalAction, executeJointGoalFeedback, executeJointGoalResult
+from rbx1_motion_planning.msg import executeJointGoalAction, executeJointGoalFeedback, executeJointGoalResult
 from rbx1_scripts.msg import executePoseGoalAction, executePoseGoalFeedback, executePoseGoalResult
 from rbx1_scripts.msg import executePositionGoalAction, executePositionGoalFeedback, executePositionGoalResult
 
