@@ -5,8 +5,13 @@ from rbx1_scripts.srv import PoseService, PoseServiceResponse, PoseServiceReques
 from math import sqrt
 from geometry_msgs.msg import Pose
 
-target_posedict = {"A1" : [0, 0 ,0 ,0 ,0, 0, 1]}
-               
+matrix = [0, 0, 0, 0, 0, 0, 0]
+target_posedict = {}
+letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
+for j in range(0, 8):
+    for k in range(0, 8):
+        my_key = "%s%s" % (letters[j], k + 1)
+        target_posedict["%s" % (my_key)] = matrix
 
 def pose_request(request):
     r = request.target_location
