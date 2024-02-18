@@ -1,0 +1,5 @@
+std_msgs/Float64MultiArray target
+---
+bool result
+---
+float64 error
