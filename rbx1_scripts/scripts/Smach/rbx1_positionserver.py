@@ -23,10 +23,10 @@ def pose_request(request):
     target_pose.position.x = p[0]
     target_pose.position.y = p[1]
     target_pose.position.z = p[2]
-    target_pose.orentation.x = p[3]
-    target_pose.orentation.y = p[4]
-    target_pose.orentation.z = p[5]
-    target_pose.orentation.w = p[6]
+    target_pose.orientation.x = p[3]
+    target_pose.orientation.y = p[4]
+    target_pose.orientation.z = p[5]
+    target_pose.orientation.w = p[6]
     return PoseServiceResponse(target_pose)
 
 
