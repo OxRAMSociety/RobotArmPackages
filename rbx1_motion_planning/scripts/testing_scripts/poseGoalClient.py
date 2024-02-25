@@ -16,13 +16,13 @@ def call_server():
 
     goal = executePoseGoalGoal()
     #rospy.loginfo("Empty Goal: %s" % goal)
-    goal.target.position.x = 0.1
-    goal.target.position.y = 0.1
-    goal.target.position.z = 0.1
+    goal.target.position.x = -0.5
+    goal.target.position.y = -0.5
+    goal.target.position.z = 0.2
     goal.target.orientation.x = 0
     goal.target.orientation.y = 1
     goal.target.orientation.z = 0
-    goal.target.orientation.w = 0
+    goal.target.orientation.w = 1
     #rospy.loginfo("Goal: %s" % goal)
     
     client.send_goal(goal)
