@@ -8,12 +8,13 @@ project(rbx1_motion_planning)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
+  geometry_msgs 
   moveit_commander
   moveit_msgs
-  rospy
-  std_msgs
+  rospy 
+  std_msgs 
   message_generation
+  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -59,7 +60,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
     FILES
-    PoseService.srv
     )
 
  
@@ -75,10 +75,10 @@ add_action_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  geometry_msgs
+  geometry_msgs 
   moveit_msgs
-  std_msgs
-  actionlib_msgs
+  std_msgs 
+  actionlib_msgs 
 )
 
 ################################################
