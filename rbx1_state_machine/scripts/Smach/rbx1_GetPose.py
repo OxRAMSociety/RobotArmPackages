@@ -29,13 +29,14 @@ class GetPose(smach.State):
         userdata.target_to_map = Pose()
         target_location = "A1"
         target_to_tag1 = self.request(target_location)
-        userdata.target_to_map.position.x = trans.transform.translation.x + target_to_tag1.position.x
-        userdata.target_to_map.position.y = trans.transform.translation.y + target_to_tag1.position.y
-        userdata.target_to_map.position.z = trans.transform.translation.z + target_to_tag1.position.z
-        userdata.target_to_map.orientation.x = trans.transform.rotation.x + target_to_tag1.orientation.x
-        userdata.target_to_map.orientation.y = trans.transform.rotation.y + target_to_tag1.orientation.y
-        userdata.target_to_map.orientation.z = trans.transform.rotation.z + target_to_tag1.orientation.z
-        userdata.target_to_map.orientation.w = trans.transform.rotation.w + target_to_tag1.orientation.w
+        # print(target_to_tag1)
+        userdata.target_to_map.position.x = trans.transform.translation.x + target_to_tag1.target_pose.position.x
+        userdata.target_to_map.position.y = trans.transform.translation.y + target_to_tag1.target_pose.position.y
+        userdata.target_to_map.position.z = trans.transform.translation.z + target_to_tag1.target_pose.position.z
+        userdata.target_to_map.orientation.x = trans.transform.rotation.x + target_to_tag1.target_pose.orientation.x
+        userdata.target_to_map.orientation.y = trans.transform.rotation.y + target_to_tag1.target_pose.orientation.y
+        userdata.target_to_map.orientation.z = trans.transform.rotation.z + target_to_tag1.target_pose.orientation.z
+        userdata.target_to_map.orientation.w = trans.transform.rotation.w + target_to_tag1.target_pose.orientation.w
         
         rospy.loginfo("Robot orientation w: %d", userdata.target_to_map.orientation.w)
 
