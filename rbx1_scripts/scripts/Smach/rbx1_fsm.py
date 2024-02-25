@@ -8,6 +8,7 @@ import smach
 
 from rbx1_GetPose import GetPose
 from rbx1_movearmpose import MOVE_ARM
+from geometry_msgs.msg import Pose
 
 
 
@@ -15,10 +16,33 @@ from rbx1_movearmpose import MOVE_ARM
 class Idle(smach.State):
     def __init__(self):
         smach.State.__init__(self,outcomes = ['Start',"Stay Idle"])
+        self.client =  SimpleActionClient('executePoseGoal_as',executePoseGoalAction)
+        self.goal = executePoseGoalGoal()
     
     def execute(self,userdata):
         user = input("Do you want to start the machine:(y/n) ")
         if user == "y":
+           
+            init_pose = Pose()
+            init_pose.position.x = p[0]
+            init_pose.position.y = p[1]
+            init_pose.position.z = p[2]
+            init_pose.orentation.x = p[3]
+            init_pose.orentation.y = p[4]
+            init_pose.orentation.z = p[5]
+            init_pose.orentation.w = p[6]
+
+            rospy.loginfo('Getting target pose information')
+        #Makes a service call to get the pose information 
+            self.goal.target = self.request(init_pose)
+            self.client.wait_for_server()
+        #Makes an action call
+            self.client.send_goal(self.goal)
+  
+            self.client.wait_for_result()
+
+            result = self.client.result()
+    
             return "Start"
         else:
             return "Stay Idle"
