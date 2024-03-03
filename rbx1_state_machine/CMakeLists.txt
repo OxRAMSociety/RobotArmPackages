@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   message_generation
+  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -61,18 +62,20 @@ add_service_files(
   PoseService.srv
 )
 
-## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+# Generate actions in the 'action' folder
+add_action_files(
+  FILES
+  executeJointGoal.action
+  executePoseGoal.action
+  executePositionGoal.action
+)
 
 # Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
   std_msgs
   geometry_msgs
+  actionlib_msgs
 )
 
 ################################################
@@ -107,7 +110,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES state_machine
- CATKIN_DEPENDS rospy smach_ros std_msgs geometry_msgs
+ CATKIN_DEPENDS rospy smach_ros std_msgs geometry_msgs actionlib_msgs
 #  DEPENDS system_lib
  DEPENDS message_runtime
 )
