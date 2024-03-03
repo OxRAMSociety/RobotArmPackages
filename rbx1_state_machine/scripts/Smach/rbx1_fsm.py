@@ -42,7 +42,6 @@ class Idle(smach.State):
             init_pose.orentation.z = p[5]
             init_pose.orentation.w = p[6]
 
-            rospy.loginfo('Getting target pose information')
         #Makes a service call to get the pose information 
             self.goal.target = self.request(init_pose)
             self.client.wait_for_server()
@@ -56,21 +55,6 @@ class Idle(smach.State):
             return "Start"
         else:
             return "Stay Idle"
-    
-
-#Define state check_target_location
-class CheckTarget(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['success'],input_keys= ['pose','robot_pose'],output_keys= ['robot_pose'])
-        
-    
-    def execute(self,userdata):
-        rospy.loginfo("Getting Pose Data")
-        userdata.robot_pose = userdata.pose
-        rospy.loginfo('Robot orietation w: %d', userdata.robot_pose.orientation.w)
-        return 'success'
-        
-
 
 if __name__ == '__main__':
     rospy.init_node("State_Machine_1.0")
