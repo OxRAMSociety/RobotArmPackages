@@ -3,7 +3,7 @@
 
   <include file="$(find rbx1_moveit_config)/launch/demo.launch"/>
 
-  <node name="rbx1MoveItCommander" pkg="rbx1_scripts" type="rbx1MoveItCommander.py" respawn="false" output="screen"/>
+  <node name="rbx1MotionPlanningServer" pkg="rbx1_motion_planning" type="rbx1MotionPlanningServer.py" respawn="false" output="screen"/>
   
   <node name="tag_0_broadcaster" pkg="tf2_ros" type="static_transform_publisher" args="0.0 0.0 0.0 0.0 0.0 0.0 tag_0 world"/>
 

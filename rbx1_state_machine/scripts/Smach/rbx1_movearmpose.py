@@ -26,26 +26,30 @@ from rbx1_scripts.srv import PoseService
 class MOVE_ARM(smach.State):
     
     def __init__(self):
-        smach.State.__init__(self,outcomes = ['success','failure'], input_keys = ['target_location'])
-        self.request = rospy.ServiceProxy('PoseService', PoseService)
+        smach.State.__init__(self,outcomes = ['success','failure'], input_keys = ['target_to_map'])
+        # self.request = rospy.ServiceProxy('PoseService', PoseService)
         self.client =  SimpleActionClient('executePoseGoal_as',executePoseGoalAction)
         self.goal = executePoseGoalGoal()
 
+    def feedback_cb(msg):
+        rospy.loginfo("Feedback Received: %s", msg)
+
     def execute(self,userdata):
-        rospy.loginfo('Getting target pose information')
+        rospy.loginfo('Move started')
+       
         #Makes a service call to get the pose information 
-        self.goal.target = self.request(userdata.target_location)
+        self.goal.target = userdata.target_to_map
+        print(self.goal)
         self.client.wait_for_server()
         #Makes an action call
-        self.client.send_goal(self.goal)
+        self.client.send_goal(self.goal, feedback_cb=self.feedback_cb)
 
         self.client.wait_for_result()
 
-        result = self.client.result()
+        result = self.client.get_result()
 
         if result:
             return 'success'
         
         else:
             return 'failure'
-
