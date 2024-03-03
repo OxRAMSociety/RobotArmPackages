@@ -5,13 +5,28 @@ from rbx1_scripts.srv import PoseService, PoseServiceResponse, PoseServiceReques
 from math import sqrt
 from geometry_msgs.msg import Pose
 
+
+# matrix = [0, 0, 0, 0, 0, 0, 1]
+# target_posedict = {}
+# letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
+# for j in range(0, 8):
+#     for k in range(0, 8):
+#         my_key = "%s%s" % (letters[j], k + 1)
+#         target_posedict["%s" % (my_key)] = matrix
+
+#dist = int(input('sidelength'))
+dist = 27.5 #unit mm
 matrix = [0, 0, 0, 0, 0, 0, 1]
 target_posedict = {}
 letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
-for j in range(0, 8):
-    for k in range(0, 8):
+for j in range(8):
+    for k in range(8):
+        matrix = matrix.copy() #note that if we don't copy, there are dependencies in between dictionary elements as they can also take variables input
+        matrix[0] = j * dist
+        matrix[1] = k * dist
         my_key = "%s%s" % (letters[j], k + 1)
-        target_posedict["%s" % (my_key)] = matrix
+        target_posedict[my_key] = matrix
+
                
 
 def pose_request(request):
