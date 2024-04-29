@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-
+'''
+Here we define the FSM for the robot. Currently it only has 3 states: Idle --> GetPose --> MoveArm. 
+Idle state receives the start robot signal, GetPose gets the target for the next move and find the target's pose, MoveArm moves the arm to the Pose that is identified by GetPose. 
+'''
 
 import rospy
 import smach
-
-
 
 from rbx1_GetPose import GetPose
 from rbx1_movearmpose import MOVE_ARM

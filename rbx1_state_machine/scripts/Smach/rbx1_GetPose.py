@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-
+'''
+This is supposed to get the pose of a given grid on the chess board. The grid is specified by the user. When CV is ready the transform should be provided by CV.
+'''
 
 import rospy
 import smach

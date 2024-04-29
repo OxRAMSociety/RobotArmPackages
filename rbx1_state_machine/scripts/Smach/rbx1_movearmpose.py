@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-
-# This script provides an action server by which to control the arm using MoveIt
-
+'''
+Fictional MoveArm state which just try to use moveit to move the arm to the given pose and currently always succeed. 
+'''
 import sys
 import rospy
 import signal
 import time
 import smach
-
 
 import moveit_commander
 from moveit_msgs.msg import DisplayTrajectory
@@ -19,9 +18,6 @@ from actionlib import SimpleActionClient
 
 from rbx1_scripts.msg import executePoseGoalAction, executePoseGoalGoal, executePoseGoalResult
 from rbx1_scripts.srv import PoseService
-
-
-
 
 class MOVE_ARM(smach.State):
     
