@@ -13,5 +13,17 @@ sudo apt-get install ros-noetic-usb-cam
 mkdir -p ~/.ros/camera_info/
 cp ./calibration.yaml ~/.ros/camera_info/head_camera.yaml
 
-# Build darknet_ros in release mode
-catkin build darknet_ros -DCMAKE_BUILD_TYPE=Release
+# # Build darknet_ros in release mode
+# catkin build darknet_ros -DCMAKE_BUILD_TYPE=Release
+
+# https://github.com/mats-robotics/yolov5_ros?tab=readme-ov-file
+pip install -r ./yolov5_ros/src/yolov5/requirements.txt # install the requirements for yolov5
+chmod +x ./yolov5_ros/src/yolov5/detect.py
+
+# Build everything
+cd ..
+catkin build
+
+# Come back
+cd -
+
