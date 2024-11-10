@@ -8,8 +8,7 @@ import smach
 
 from rbx1_GetPose import GetPose
 from rbx1_movearmpose import MOVE_ARM
-
-
+from geometry_msgs.msg import Pose
 
 #Define the idle state
 class Idle(smach.State):
@@ -19,10 +18,11 @@ class Idle(smach.State):
     def execute(self,userdata):
         user = input("Do you want to start the machine:(y/n) ")
         if user == "y":
+            
             return "Start"
         else:
             return "Stay Idle"
-    
+
 
 
 #Define state check_target_location

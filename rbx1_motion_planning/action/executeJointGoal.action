@@ -1,5 +1,8 @@
+#Goal
 std_msgs/Float64MultiArray target
 ---
-bool result
+#Result
+bool success
 ---
+#Feedback
 float64 error
