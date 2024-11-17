@@ -53,7 +53,7 @@ def process_image(cv_image):
         # Draw on circle
         for i in range(0, 9):
             for j in range(0, 9):
-                 cv2.circle(cv_image, (int(corners[i, j][0]), int(corners[i, j][1])), 10, (255, 0, 0), 1)
+                 cv2.circle(cv_image, (int(corners[i, j][0]), int(corners[i, j][1])), 5, (255, 0, 0), 1)
         rospy.loginfo(type(corners))
         # Print the grid positions
         rospy.loginfo("Grid positions:")
@@ -68,7 +68,7 @@ def image_publisher():
     # Create a publisher
     pub = rospy.Publisher('image_topic', Image, queue_size=10)
     # Load the image
-    path = "/home/kirsten/tester_computer_vision/src/RobotArmPackages/rbx1_computer_vision/scripts/chessboard.png" # change this to your image file path - MatLike
+    path = "/home/kirsten/tester_computer_vision/src/RobotArmPackages/rbx1_computer_vision/scripts/chessboard3.png" # change this to your image file path - MatLike
     cv_image = cv2.imread(path) # Loads the image as a NumPy Array
     cv_image = process_image(cv_image)
     if cv_image is None:    
