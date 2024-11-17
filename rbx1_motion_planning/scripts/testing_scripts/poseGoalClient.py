@@ -2,6 +2,29 @@
 
 # An action client to test the executePoseGoal_as action server
 
+# Notes:
+# Vertically downwards quaternions:
+# goal.target.orientation.x = -0.5
+# goal.target.orientation.y = -0.5
+# goal.target.orientation.z = -0.5
+# goal.target.orientation.w = 0.5
+#
+#x = 0.43, y = -0.56, z = 0.43, w = 0.56
+#
+# These two dont work?
+# goal.target.orientation.x = 0.707
+# goal.target.orientation.y = 0
+# goal.target.orientation.z = 0.707
+# goal.target.orientation.w = 0
+#
+# goal.target.orientation.x = 0
+# goal.target.orientation.y = -.707
+# goal.target.orientation.z = 0
+# goal.target.orientation.w = 0.707
+#
+
+
+
 import rospy
 import math
 pi = math.pi
@@ -16,13 +39,13 @@ def call_server():
 
     goal = executePoseGoalGoal()
     #rospy.loginfo("Empty Goal: %s" % goal)
-    goal.target.position.x = -0.5
-    goal.target.position.y = -0.5
-    goal.target.position.z = 0.2
-    goal.target.orientation.x = 0
-    goal.target.orientation.y = 1
-    goal.target.orientation.z = 0
-    goal.target.orientation.w = 1
+    goal.target.position.x = 0.1
+    goal.target.position.y = 0.1
+    goal.target.position.z = 0.1
+    goal.target.orientation.x = 0.5
+    goal.target.orientation.y = 0.5
+    goal.target.orientation.z = 0.5
+    goal.target.orientation.w = -0.5
     #rospy.loginfo("Goal: %s" % goal)
     
     client.send_goal(goal)

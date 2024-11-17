@@ -1,8 +1,28 @@
 #! /usr/bin/env python3
 
-# Questions:
-    # Why do we need acceleration and velocity scaling factors? (I havent done the query_acc_vel function as I dont know why its needed)
-        # Look up what the set_max_acceleration_scaling_factor() function does and velocity
+# ToDo:
+    # Add the chess board to the rviz environent
+    # Add capability to add a chess piece into the scene and pick and place it avoiding the area where other pieces may be 
+        # This will be most easily done by:
+            # 1. Adding the piece to the environment
+            # 2. Moving to directly above the piece while staing out of the region where peices may be (a certain height above the board)
+            # 3. Move down, pick up the piece, and move back up out of the region where pieces may be
+            # 4. Move to directly above where we want to place the piece 
+            # 5. Move vertically downwards until almost touching the board with the bottom of the piece but not quite 
+            #       (this avoids the arm trying to push the piece into the board if measurements are slightly off), 
+            #       then drop the piece (hopefully it wont fall over if its only a mm or 2 above the board)
+            # 6. Then move the arm back up and send it back to a home position to allow the other player to make their turn
+    # Add capability for the arm to take another piece
+        # Possibilities to do this:
+            # 1. Pick up the oppositions piece and place it off the board before moving your piece onto the square
+            # 2. Move your piece next to the square and then pick up their piece and move your piece onto the middle of the square after (may not be possible if pieces are close together)
+            # 3. Move your piece next to the oppositions piece and push their piece out of the way without letting go then drop your piece once in the middle of the square 
+            #       and then pick up their piece and place it off the board. (This is most realistic but may cause problems with knocking over pieces and not having enough space)
+    # Add a region where the used pieces will go so that if our pawn reaches the other side we know where to pick our queen (or other piece) up from to place it on the board
+    #   also there should be a backup in the state machine to tell the opponent to place our queen back on the board if we cant find it.
+    # Avoid torque heavy positions i.e. having the arm horizontal as the motor will likely fail
+
+# Notes:
 
     # Are the boxes only used to attach chess pieces to the robot hand when they are being moved 
     #   or are boxes also used to represent obstructions in the scene for object avoidance?
@@ -16,11 +36,12 @@
     # I looked it up and a website said it may be becuase multiple clients are trying to use the server at the same 
     #   time however this shouldnt be the case with how I was using the code
 
-    # What more needs to be added, this is up to date with the previous version (except quer_acc_vel)
-
-# Notes:
     # Currently the script assumes all data is proveded as moveit wants it (e.g. assumes joint goals are given in radians)
     #   this can be changed once I know what format the goals will be given in
+
+    # The commander outputs values for joint angles to the robot in multiple waypoints to create the path. 
+    #   These joint angles are given relative to the robot in its vertically upward home position.
+
 
 # This script sets up an action server for motion planing using moveit
 
@@ -85,6 +106,34 @@ class robotMoveitCommander:
         # Start the position goal action server
         self.executePositionGoal_as = SimpleActionServer("executePositionGoal_as", executePositionGoalAction, execute_cb = self.executePositionGoal_cb, auto_start=False)
         self.executePositionGoal_as.start()
+
+    def query_acc_vel(self):
+        # Prompts the user for the max acceleration and velocity scaling factors
+        # (These factors are used to scale down all acceleration and velocities that the robot will experience making it slower but more accurate, 
+        #  e.g. if the robots motors allow it to have a maximum acceleration possible of 2m/s^2 and we set the scaling factor to 0.5 then we are 
+        #  limiting the acceleration to a maximumm of 1m/s^2 so if we try to make the robot accelerate as fast as possible it will only be at 1m/s^2 
+        #  acceleration. The value doesnt just scale down the maximum as this would cause wrong motion, it scales all values that are provided,
+        #  e.g. if we ask the robot to move with half acceleration it will be 0.5m/s^2 which is half of our scaled maximum.)
+
+        # Ask the user to input their dersired max acceleration scaling factor
+        a_scale = float(input("Max. Acceleration Scaling Factor? (0.1<=a<=1): "))
+        # Ensure that the scaling factor is in the range 0.1 - 1 as any other values are unreasonable
+        if a_scale < 0.1:
+            a_scale = 0.1
+        elif a_scale > 1:
+            a_scale = 1
+        # Set the chosen value in the arm settings
+        self.arm.set_max_acceleration_scaling_factor(a_scale)
+
+        # Ask the user to input their dersired max velocity scaling factor
+        v_scale = float(input("Max. Velocity Scaling Factor? (0.1<=v<=1): "))
+        # Ensure that the scaling factor is in the range 0.1 - 1 as any other values are unreasonable
+        if v_scale < 0.1:
+            v_scale = 0.1
+        elif v_scale > 1:
+            v_scale = 1
+        # Set the chosen value in the arm settings
+        self.arm.set_max_velocity_scaling_factor(v_scale)
 
     def execute_joint_goal(self, joint_target):
         # Function to execute a movement when provided with a joint goal
@@ -325,6 +374,10 @@ if __name__ == '__main__':
     rospy.init_node("rbx1MotionPlanningServer", anonymous=True)
     # Create an instance of the class
     s = robotMoveitCommander()
+    # Print the current state 
+    s.print_state()
+    # Ask the user for their max acceleration and velocity scaling factors (This can later be implimented as just setting them to certain values once we know what works best)
+    s.query_acc_vel()
 
     # Testing
     # s.add_box("box", [0.075,0.075,0.075], [0,0,0.11], [0,0,0,1])
