@@ -1,6 +1,6 @@
-image_width: 1280
-image_height: 720
-camera_name: narrow_stereo
+image_width: 640
+image_height: 480
+camera_name: HP Wide Vision HD Camera
 camera_matrix:
   rows: 3
   cols: 3

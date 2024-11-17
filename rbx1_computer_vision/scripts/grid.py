@@ -117,5 +117,5 @@ if __name__ == '__main__':
 
     pub = rospy.Publisher("processed_image", Image, queue_size=10)
 
-    rospy.Subscriber("/camera/color/image_rect_color", Image, image_callback)
+    rospy.Subscriber('image_topic', Image, queue_size=10)
     rospy.spin()
