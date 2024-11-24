@@ -14,5 +14,6 @@
     <arg name="camera_name" value="/camera"/>
     <arg name="image_topic" value="/color/image_raw"/>
   </include>
-  <node name="tag_0_broadcaster" pkg="tf2_ros" type="static_transform_publisher" args="0.0 0.0 0.0 0.0 0.0 0.0 tag_0 world"/>
+  <node name="tag_1_broadcaster" pkg="tf2_ros" type="static_transform_publisher" args="1.0 0.0 1.0 0.0 0.0 0.0 1.0 map tag1"/>
+  <node name="rbx1_positionserver" pkg="rbx1_state_machine" type="rbx1_positionserver.py"/>
 </launch>

@@ -17,9 +17,9 @@ class GetPose(smach.State):
         smach.State.__init__(self, outcomes= ['success'],input_keys=["target_to_map"],output_keys = ["target_to_map"])
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
-        self.request = rospy.ServiceProxy('PoseService', PoseService)
+        self.request = rospy.ServiceProxy('PoseService', PoseService) # Use the positionserver service which provides transform from grid to tag1
     def execute(self,userdata):
-        trans = self.tfBuffer.lookup_transform('map', "tag1", rospy.Time())
+        trans = self.tfBuffer.lookup_transform('map', "tag1", rospy.Time()) # This is a transform that will be broadcasted by a tf2 static_transform_publisher, see launch file
         tag1_to_map = Pose()
         tag1_to_map.position.x = trans.transform.translation.x
         tag1_to_map.position.y = trans.transform.translation.y
@@ -29,9 +29,9 @@ class GetPose(smach.State):
         tag1_to_map.orientation.z = trans.transform.rotation.z
         tag1_to_map.orientation.w = trans.transform.rotation.w
         userdata.target_to_map = Pose()
-        target_location = "A1"
-        target_to_tag1 = self.request(target_location)
-        # print(target_to_tag1)
+        target_location = "F1" # Change this to any arbitrary board coordinate or a function that output grid of interest
+        target_to_tag1 = self.request(target_location) # Call the position server service
+        # Combine the two transforms linearly to get the transform from the grid to the map frame
         userdata.target_to_map.position.x = trans.transform.translation.x + target_to_tag1.target_pose.position.x
         userdata.target_to_map.position.y = trans.transform.translation.y + target_to_tag1.target_pose.position.y
         userdata.target_to_map.position.z = trans.transform.translation.z + target_to_tag1.target_pose.position.z
@@ -42,5 +42,5 @@ class GetPose(smach.State):
         
         rospy.loginfo("Robot orientation w: %d", userdata.target_to_map.orientation.w)
 
-        return 'success'
+        return 'success' # Can't fail rn
         

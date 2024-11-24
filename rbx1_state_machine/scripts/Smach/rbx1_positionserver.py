@@ -1,20 +1,11 @@
 #! /usr/bin/env python3
-
+'''This is a ros service that will map chess board coordinate requested by any other nodes to a transform relative to tag1 (an april tag on the chess board)'''
 import rospy
 from rbx1_scripts.srv import PoseService, PoseServiceResponse, PoseServiceRequest
 from math import sqrt
 from geometry_msgs.msg import Pose
 
-
-# matrix = [0, 0, 0, 0, 0, 0, 1]
-# target_posedict = {}
-# letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
-# for j in range(0, 8):
-#     for k in range(0, 8):
-#         my_key = "%s%s" % (letters[j], k + 1)
-#         target_posedict["%s" % (my_key)] = matrix
-
-#dist = int(input('sidelength'))
+## map chess board grid coordinate to transform relative to tag1
 dist = 27.5 #unit mm
 matrix = [0, 0, 0, 0, 0, 0, 1]
 target_posedict = {}
@@ -28,7 +19,7 @@ for j in range(8):
         target_posedict[my_key] = matrix
 
                
-
+# Function that handles the request for the service, request will be in form of chess board grid coordinate (e.g. B2, F5)
 def pose_request(request):
     r = request.target_location
     
