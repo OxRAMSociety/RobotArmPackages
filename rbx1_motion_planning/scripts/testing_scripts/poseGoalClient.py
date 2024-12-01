@@ -3,6 +3,7 @@
 # An action client to test the executePoseGoal_as action server
 
 # Notes:
+# THE FOLLOWING DATA IS UNTESTED AND OUT OF DATE BUT KEPT TO BE CHECKED
 # Vertically downwards quaternions:
 # goal.target.orientation.x = -0.5
 # goal.target.orientation.y = -0.5
@@ -18,11 +19,13 @@
 # goal.target.orientation.w = 0
 #
 # goal.target.orientation.x = 0
-# goal.target.orientation.y = -.707
+# goal.target.orientation.y = -0.707
 # goal.target.orientation.z = 0
 # goal.target.orientation.w = 0.707
 #
 
+# For position on +ve y axis, x=0, and grippers aligned with the x axis
+# Orientation (quaternion): x = 0, y = -0.707, z = 0, w = 0.707
 
 
 import rospy
@@ -42,10 +45,10 @@ def call_server():
     goal.target.position.x = 0.1
     goal.target.position.y = 0.1
     goal.target.position.z = 0.1
-    goal.target.orientation.x = 0.5
-    goal.target.orientation.y = 0.5
-    goal.target.orientation.z = 0.5
-    goal.target.orientation.w = -0.5
+    goal.target.orientation.x = 0
+    goal.target.orientation.y = 0
+    goal.target.orientation.z = 0
+    goal.target.orientation.w = 1
     #rospy.loginfo("Goal: %s" % goal)
     
     client.send_goal(goal)

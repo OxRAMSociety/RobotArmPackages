@@ -16,12 +16,12 @@ current_pose = group.get_current_pose()
 
 # Print the current pose (position and orientation)
 print("Current Pose of the End Effector:")
-print("Position: x = {:.2f}, y = {:.2f}, z = {:.2f}".format(
+print("Position: x = {:.4f}, y = {:.4f}, z = {:.4f}".format(
     current_pose.pose.position.x,
     current_pose.pose.position.y,
     current_pose.pose.position.z
 ))
-print("Orientation (quaternion): x = {:.2f}, y = {:.2f}, z = {:.2f}, w = {:.2f}".format(
+print("Orientation (quaternion): x = {:.4f}, y = {:.4f}, z = {:.4f}, w = {:.4f}".format(
     current_pose.pose.orientation.x,
     current_pose.pose.orientation.y,
     current_pose.pose.orientation.z,

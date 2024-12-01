@@ -42,6 +42,9 @@
     # The commander outputs values for joint angles to the robot in multiple waypoints to create the path. 
     #   These joint angles are given relative to the robot in its vertically upward home position.
 
+    # Home pose of robot:
+    # Position: x = 0.0000, y = -0.0000, z = 0.7171
+    # Orientation (quaternion): x = 0.6936, y = 0.1380, z = -0.6934, w = 0.1379
 
 # This script sets up an action server for motion planing using moveit
 
