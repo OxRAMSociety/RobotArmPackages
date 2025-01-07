@@ -27,11 +27,38 @@
 # For position on +ve y axis, x=0, and grippers aligned with the x axis
 # Orientation (quaternion): x = 0, y = -0.707, z = 0, w = 0.707
 
+# THE FOLLOWING DATA IS TESTED UNDER THE NEW CONFIGURATION
+# Quaternion: [x,y,z,w] Facing direction: (+-)(xyz) Gripper orientation: xyz (explination of orientation)
+# [1, 0, 0, 0] -x y (horizontal)
+# [0, 1, 0, 0] +x y (horizontal)
+# [0, 0, 1, 0] +x y (horizontal)
+# [0, 0, 0, 1] -x y (horizontal)
+# [0.707, 0, 0, 0.707] -x z (vertical)
+# [0, 0.707, 0.707, 0] +x z (vertical)
+# [0, 0.707, 0, 0.707] +z y 
+# [-0.707, 0.707, 0, 0] +y x (horizontal)
+# [0, -0.707, 0, 0.707] -z y
+# [0, -0.707, 0.707, 0] +x z (vertical)
+# [0, 0, -0.707, 0.707] +y x (horizontal)
+# [0.5, 0.5, 0.5, 0.5] -y z (vertical)
+# [0.5, -0.5, 0.5, 0.5] -z x
+# [0.5, 0.5, 0.5, -0.5] -z x
+# [0.5, 0.5, -0.5, 0.5] +z x
+# [0.707, 0, 0.707, 0] -z y
+
+# Most useful orientations:
+# [0.5, -0.5, 0.5, 0.5] -z x
+# [0.5, 0.5, 0.5, -0.5] -z x
+# [0, -0.707, 0, 0.707] -z y
+# [0.707, 0, 0.707, 0] -z y
+
 
 import rospy
+import numpy as np
 import math
 pi = math.pi
 
+from tf.transformations import quaternion_from_euler
 from actionlib import SimpleActionClient
 from rbx1_motion_planning.msg import executePoseGoalAction, executePoseGoalGoal
 
@@ -42,13 +69,27 @@ def call_server():
 
     goal = executePoseGoalGoal()
     #rospy.loginfo("Empty Goal: %s" % goal)
-    goal.target.position.x = 0.1
-    goal.target.position.y = 0.1
-    goal.target.position.z = 0.1
-    goal.target.orientation.x = 0
-    goal.target.orientation.y = 0
-    goal.target.orientation.z = 0
-    goal.target.orientation.w = 1
+    goal.target.position.x = 0.3
+    goal.target.position.y = 0
+    goal.target.position.z = 0.2
+
+    # quaternion from euler
+    # roll_angle = 0
+    # pitch_angle = 3*pi/4
+    # yaw_angle = 3*pi/4
+    # quaternion = quaternion_from_euler(roll_angle, pitch_angle, yaw_angle)
+    
+    # quaternion directly
+    npquaternion = np.array([1,0,1,0])
+    npquaternion = npquaternion/np.linalg.norm(npquaternion)
+    quaternion = npquaternion.tolist()
+
+    rospy.loginfo("Quaternion: %s" % quaternion)
+
+    goal.target.orientation.x = quaternion[0]
+    goal.target.orientation.y = quaternion[1]
+    goal.target.orientation.z = quaternion[2]
+    goal.target.orientation.w = quaternion[3]
     #rospy.loginfo("Goal: %s" % goal)
     
     client.send_goal(goal)

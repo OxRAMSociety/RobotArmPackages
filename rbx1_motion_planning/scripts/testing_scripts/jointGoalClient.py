@@ -17,8 +17,9 @@ def call_server():
 
     goal = executeJointGoalGoal()
     rospy.loginfo("Empty Goal: %s" % goal)
-    goal.target.data = [-0.2858873213351435, 1.049099413100962, 1.262524806448622, -3.1296340327191934, 0.8079612860208109, 0]
+    goal.target.data = [-1, 0, 0, 0, pi/2, 0]
     rospy.loginfo("Goal: %s" % goal)
+    #1.0337636332601423, 1.2769740515619334, -0.855007766900004, 1.4386449271569612, 1.6142400117962017, 0.42305389743080846, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     
     client.send_goal(goal)
 
