@@ -1,26 +1,43 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
+import sys
 import moveit_commander
 import rospy
-from moveit_commander import PlanningSceneInterface
-from geometry_msgs.msg import Pose
+import os
+import rospkg  # Used to resolve package paths
+import geometry_msgs.msg
 
-rospy.init_node("add_mesh_collision_object", anonymous=True)
+def main():
+    moveit_commander.roscpp_initialize(sys.argv)
+    rospy.init_node("add_mesh_collision_object", anonymous=True)
 
-# Initialize PlanningSceneInterface
-scene = PlanningSceneInterface()
+    # Initialize the PlanningSceneInterface
+    scene = moveit_commander.PlanningSceneInterface()
 
-# Wait for the scene to initialize
-rospy.sleep(2)
+    # Wait for the scene to initialize
+    rospy.sleep(2)
 
-# Define the pose of the mesh
-mesh_pose = Pose()
-mesh_pose.position.x = 0.5
-mesh_pose.position.y = 0.0
-mesh_pose.position.z = 0.0
-mesh_pose.orientation.w = 1.0
+    # Get the package path using rospkg
+    rospack = rospkg.RosPack()
+    package_path = rospack.get_path('rbx1_motion_planning')  # Replace with your package name
 
-# Add the mesh to the scene
-mesh_name = "chess_board"
-mesh_path = "package://rbx1_motion_planning/meshes/chess_board.fbx"  # Path to your mesh
-scene.add_mesh(mesh_name, mesh_pose, mesh_path, size=(1.0, 1.0, 1.0))
+    # Define the STL file path
+    mesh_file_path = os.path.join(package_path, "meshes", "chess_board.stl")
+
+    # Define the pose of the collision object
+    collision_pose = geometry_msgs.msg.PoseStamped()
+    collision_pose.header.frame_id = 'world'
+    collision_pose.pose.position.x = 1.0
+    collision_pose.pose.position.y = 0.0
+    collision_pose.pose.position.z = 0.0
+    collision_pose.pose.orientation.w = 1.0  # Identity rotation
+    rospy.loginfo(collision_pose)
+
+    # Add the mesh as a collision object in the planning scene
+    scene.add_mesh("chess_board", collision_pose, mesh_file_path)
+
+    # Allow RViz to update and visualize the object
+    rospy.sleep(2)
+
+if __name__ == "__main__":
+    main()
