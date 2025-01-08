@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # ToDo:
-    # Add the chess board to the rviz environent
+    # Look for a way to give a pointing direction of the hand (i.e. downward) without giving a quaternion and forcing it into a certain rotation in that direction
     # Add capability to add a chess piece into the scene and pick and place it avoiding the area where other pieces may be 
         # This will be most easily done by:
             # 1. Adding the piece to the environment
@@ -58,6 +58,9 @@ from actionlib import SimpleActionServer
 from rbx1_motion_planning.msg import executeJointGoalAction, executeJointGoalFeedback, executeJointGoalResult, executeJointGoalGoal #executeJointGoalGoal only needed for testing
 from rbx1_motion_planning.msg import executePoseGoalAction, executePoseGoalFeedback, executePoseGoalResult, executePoseGoalGoal #executePoseGoalGoal only needed for testing
 from rbx1_motion_planning.msg import executePositionGoalAction, executePositionGoalFeedback, executePositionGoalResult, executePositionGoalGoal #executePositionGoalGoal only needed for testing
+from rbx1_motion_planning.msg import executeHandGoalAction, executeHandGoalFeedback, executeHandGoalResult, executeHandGoalGoal #executeHandGoalGoal only needed for testing
+from rbx1_motion_planning.msg import attachObjectAction, attachObjectFeedback, attachObjectResult, attachObjectGoal #attachObjectGoal only needed for testing
+from rbx1_motion_planning.msg import detachObjectAction, detachObjectFeedback, detachObjectResult, detachObjectGoal #detachObjectGoal only needed for testing
 
 class robotMoveitCommander:
     # class containting the different ros nodes used to plan the motion given different inputs
@@ -109,6 +112,15 @@ class robotMoveitCommander:
         # Start the position goal action server
         self.executePositionGoal_as = SimpleActionServer("executePositionGoal_as", executePositionGoalAction, execute_cb = self.executePositionGoal_cb, auto_start=False)
         self.executePositionGoal_as.start()
+        # Start the hand goal action server
+        self.executeHandGoal_as = SimpleActionServer("executeHandGoal_as", executeHandGoalAction, execute_cb = self.executeHandGoal_cb, auto_start=False)
+        self.executeHandGoal_as.start()
+        # Start the attach object action server
+        self.attachObject_as = SimpleActionServer("attachObject_as", attachObjectAction, execute_cb = self.attachObject_cb, auto_start=False)
+        self.attachObject_as.start()
+        # Start the detach object action server
+        self.detachObject_as = SimpleActionServer("detachObject_as", detachObjectAction, execute_cb = self.detachObject_cb, auto_start=False)
+        self.detachObject_as.start()
 
     def query_acc_vel(self):
         # Prompts the user for the max acceleration and velocity scaling factors
@@ -261,6 +273,43 @@ class robotMoveitCommander:
             # Set the result of the action server to be aborted (use executePositionGoalResult() so that the result is structured as ros wants it)
             self.executePositionGoal_as.set_aborted(executePositionGoalResult(result))
 
+    def execute_hand_goal(self, hand_target):
+        # Function to execute a hand movement when provided with a goal
+        # Input: hand_target - an float from 0 to 1.5 radians
+
+        # Store the current hand joint values incase some of the joint targets are left blank, then the hand wont move
+        hand_goal = self.hand.get_current_joint_values()
+        # Update only the first joint value to the target
+        hand_goal[0] = hand_target
+        # Log the hand goal
+        rospy.loginfo("Hand Goal: %s" % hand_goal)
+        # Execute the movement and store the result (bool)
+        outcome = self.hand.go(hand_goal, wait=True)
+        # Call stop to ensure no residual movement
+        self.hand.stop()
+        # Return the outcome of the movement
+        return outcome
+    
+    def executeHandGoal_cb(self, goal):
+        # Callback function for the executeHandGoal action server
+
+        # Log that a hand goal is trying to be executed
+        rospy.loginfo("============ Executing Hand Goal")
+        # Store whether the movement was successful or not (bool)
+        result = self.execute_hand_goal(goal.target)
+
+        # Check if the movement was successful
+        if result:
+            # Log that it was successful
+            rospy.loginfo("SUCCESS - Executed Hand Goal!")
+            # Set the result of the action server to be successful (use executeHandGoalResult() so that the result is structured as ros wants it)
+            self.executeHandGoal_as.set_succeeded(executeHandGoalResult(result))
+        else:
+            # Log that it failed
+            rospy.loginfo("FALIURE - Hand Goal Aborted!")
+            # Set the result of the action server to be aborted (use executeHandGoalResult() so that the result is structured as ros wants it)
+            self.executeHandGoal_as.set_aborted(executeHandGoalResult(result))
+
 
     def print_state(self):
         # Function to print the current robot state
@@ -369,6 +418,58 @@ class robotMoveitCommander:
         self.scene.remove_world_object(self.box_name)
         # Wait for the box to be removed and return if it was successful 
         return self.check(box_is_attached=False, box_is_known=False, timeout=timeout)
+
+    def attachObject_cb(self, goal):
+        # Function that attaches an existing object in the scene to the end effector
+
+        rospy.loginfo("============ Attaching Object")
+
+        rospy.loginfo(goal.object_name)
+
+        # Get all objects
+        objects = self.scene.get_objects()
+
+        # See if object exists
+        if goal.object_name in objects:
+            # Store the object
+            object = objects[goal.object_name]
+            # Collisions between the box and all links in touch_links are ignored so that they can be in contact, add the links used to pick up the box to this
+            # Add the hand links to touch_links
+            touch_links = self.robot.get_link_names(group=self.hand_name)
+            
+            # Setup the attached object
+            attached_object = moveit_msgs.msg.AttachedCollisionObject()
+            rospy.loginfo("Empty attached object:")
+            rospy.loginfo(attached_object)
+            attached_object.link_name = self.eef_link
+            attached_object.object = object
+            attached_object.touch_links = touch_links
+
+            # Attach the object
+            self.scene.attach_object(attached_object)
+
+            # !!!! THERE IS CURRENTLY NO CHECK TO SEE IF THIS WORKED, A FUNCTION SIMILAR TO CHECK NEEDS TO BE ADDED FOR THIS !!!!
+            # For now the server will always return true
+            rospy.loginfo("SUCCESS - Attached Object!")
+            result = True
+            # Set the result of the action server to be successful (use attachObjectResult() so that the result is structured as ros wants it)
+            self.attachObject_as.set_succeeded(attachObjectResult(result))
+        else:
+            # Object doesnt exist so abort
+            rospy.loginfo("FALIURE - Object NOT Attached!")
+            result = False
+            self.attachObject_as.set_aborted(attachObjectResult(result))
+    
+    def detachObject_cb(self, goal):
+        # Function that detaches all objects connected to the robot
+        
+        rospy.loginfo("============ Detaching Objects")
+        
+        self.scene.remove_attached_object()
+
+        result = True
+
+        self.detachObject_as.set_succeeded(detachObjectResult(result))
 
 if __name__ == '__main__':
     # Setup moveit commander

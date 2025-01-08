@@ -45,12 +45,16 @@
 # [0.5, 0.5, 0.5, -0.5] -z x
 # [0.5, 0.5, -0.5, 0.5] +z x
 # [0.707, 0, 0.707, 0] -z y
+# [0.271, -0.653, 0.271, 0.653] -z y=-x
+# [-0.271, -0.653, -0.271, 0.653] -z y=x
 
 # Most useful orientations:
 # [0.5, -0.5, 0.5, 0.5] -z x
 # [0.5, 0.5, 0.5, -0.5] -z x
 # [0, -0.707, 0, 0.707] -z y
 # [0.707, 0, 0.707, 0] -z y
+# [0.271, -0.653, 0.271, 0.653] -z y=-x
+# [-0.271, -0.653, -0.271, 0.653] -z y=x
 
 
 import rospy
@@ -69,9 +73,9 @@ def call_server():
 
     goal = executePoseGoalGoal()
     #rospy.loginfo("Empty Goal: %s" % goal)
-    goal.target.position.x = 0.3
-    goal.target.position.y = 0
-    goal.target.position.z = 0.2
+    goal.target.position.x = 0.22 + 0.0875
+    goal.target.position.y = 0 - 0.0875
+    goal.target.position.z = 0.15
 
     # quaternion from euler
     # roll_angle = 0
@@ -80,11 +84,11 @@ def call_server():
     # quaternion = quaternion_from_euler(roll_angle, pitch_angle, yaw_angle)
     
     # quaternion directly
-    npquaternion = np.array([1,0,1,0])
+    npquaternion = np.array([-0.271, -0.653, -0.271, 0.653])
     npquaternion = npquaternion/np.linalg.norm(npquaternion)
     quaternion = npquaternion.tolist()
 
-    rospy.loginfo("Quaternion: %s" % quaternion)
+    # rospy.loginfo("Quaternion: %s" % quaternion)
 
     goal.target.orientation.x = quaternion[0]
     goal.target.orientation.y = quaternion[1]

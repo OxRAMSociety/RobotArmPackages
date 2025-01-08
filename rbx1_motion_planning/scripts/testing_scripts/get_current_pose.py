@@ -9,10 +9,12 @@ rospy.init_node('get_current_pose_example')
 # Initialize MoveIt Commander
 robot = RobotCommander()
 scene = PlanningSceneInterface()
-group = MoveGroupCommander("arm") 
+arm = MoveGroupCommander("arm") 
+hand = MoveGroupCommander("gripper")
 
 # Get the current pose of the end effector
-current_pose = group.get_current_pose()
+current_pose = arm.get_current_pose()
+current_hand_joint_values = hand.get_current_joint_values()
 
 # Print the current pose (position and orientation)
 print("Current Pose of the End Effector:")
@@ -27,3 +29,5 @@ print("Orientation (quaternion): x = {:.4f}, y = {:.4f}, z = {:.4f}, w = {:.4f}"
     current_pose.pose.orientation.z,
     current_pose.pose.orientation.w
 ))
+print("Current Joint Values of Hand: ")
+print(current_hand_joint_values)

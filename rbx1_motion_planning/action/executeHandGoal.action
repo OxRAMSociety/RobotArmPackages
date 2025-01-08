@@ -1,0 +1,8 @@
+#Goal
+float64 target
+---
+#Result
+bool success
+---
+#Feedback
+float64 error

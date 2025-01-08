@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
-# An action client to test the executeJointGoal_as action server
+# An action client to test the executeHandGoal_as action server
+# Currently doesnt work, suspected to be because the hand is to restricted in the model
 
 import rospy
 import math
@@ -8,18 +9,17 @@ import numpy as np
 pi = math.pi
 
 from actionlib import SimpleActionClient
-from rbx1_motion_planning.msg import executeJointGoalAction, executeJointGoalGoal
+from rbx1_motion_planning.msg import executeHandGoalAction, executeHandGoalGoal
 
 def call_server():
-    client = SimpleActionClient('executeJointGoal_as', executeJointGoalAction)
+    client = SimpleActionClient('executeHandGoal_as', executeHandGoalAction)
 
     client.wait_for_server()
 
-    goal = executeJointGoalGoal()
+    goal = executeHandGoalGoal()
     rospy.loginfo("Empty Goal: %s" % goal)
-    goal.target.data = [0, 0, 0, 0, 0, 0,1,1,1,1,1,1]
+    goal.target = 1.5
     rospy.loginfo("Goal: %s" % goal)
-    #1.0337636332601423, 1.2769740515619334, -0.855007766900004, 1.4386449271569612, 1.6142400117962017, 0.42305389743080846, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     
     client.send_goal(goal)
 
@@ -32,7 +32,7 @@ def call_server():
 if __name__ == '__main__':
 
     try:
-        rospy.init_node('executeJointGoalClientNode')
+        rospy.init_node('executeHandGoalClientNode')
         result =  call_server()
         rospy.loginfo("Result Received: %s", result)
     except rospy.ROSInterruptException as e:

@@ -16,7 +16,7 @@ def call_server():
 
     goal = executePositionGoalGoal()
     #rospy.loginfo("Empty Goal: %s" % goal)
-    goal.target.data = [0, 0.4, 0.1]
+    goal.target.data = [0.86875, 0.21875, 0.1]
     #rospy.loginfo("Goal: %s" % goal)
     
     client.send_goal(goal)

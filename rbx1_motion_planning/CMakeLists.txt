@@ -70,6 +70,9 @@ add_action_files(
   executeJointGoal.action
   executePoseGoal.action
   executePositionGoal.action
+  executeHandGoal.action
+  attachObject.action
+  detachObject.action
 )
 
 ## Generate added messages and services with any dependencies listed here
