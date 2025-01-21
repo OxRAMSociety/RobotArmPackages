@@ -18,7 +18,7 @@ def call_server():
 
     goal = executeHandGoalGoal()
     rospy.loginfo("Empty Goal: %s" % goal)
-    goal.target = 1.5
+    goal.target.data = [0.5, 1]
     rospy.loginfo("Goal: %s" % goal)
     
     client.send_goal(goal)

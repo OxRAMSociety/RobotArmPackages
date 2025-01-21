@@ -62,7 +62,7 @@ import numpy as np
 import math
 pi = math.pi
 
-from tf.transformations import quaternion_from_euler
+from tf.transformations import quaternion_from_euler, quaternion_about_axis, quaternion_multiply
 from actionlib import SimpleActionClient
 from rbx1_motion_planning.msg import executePoseGoalAction, executePoseGoalGoal
 
@@ -84,9 +84,29 @@ def call_server():
     # quaternion = quaternion_from_euler(roll_angle, pitch_angle, yaw_angle)
     
     # quaternion directly
-    npquaternion = np.array([-0.271, -0.653, -0.271, 0.653])
-    npquaternion = npquaternion/np.linalg.norm(npquaternion)
-    quaternion = npquaternion.tolist()
+    # npquaternion = np.array([-0.271, -0.653, -0.271, 0.653])
+    # npquaternion = npquaternion/np.linalg.norm(npquaternion)
+    # quaternion = npquaternion.tolist()
+
+    # quaternion defined by angle of rotation about an axis
+    # WARNING: This does not work for [1,0,0] since that would make the first quaternion [0,0,0,0], to fix this there should be a check if axis = [1,0,0], in which case quaternion_1 should be the unit quaternion (corresponding to no transformation)
+    # define inputs
+    angle = 0.1
+    axis_vector = [0, 1, 0]
+    # define the quaternion_1 for rotation to the axis wanted
+    axis_vector = np.array(axis_vector) * -1 # for some reason the robot always points in the opposite direction so this -1 fixes that
+    unit_axis_vector = axis_vector/np.linalg.norm(axis_vector)
+    x = unit_axis_vector[0]
+    y = unit_axis_vector[1]
+    z = unit_axis_vector[2]
+    non_unit_quaternion_1 = np.array([0, -z, y, 1+x])
+    quaternion_1 = non_unit_quaternion_1/np.linalg.norm(non_unit_quaternion_1)
+    # define the quaternion_2 for rotation around the axis wanted
+    quaternion_2 = quaternion_about_axis(angle, axis_vector)
+    # multiply the two to get the overall rotation
+    quaternion = quaternion_multiply(quaternion_2, quaternion_1)
+    quaternion_msg = "Quaternion: x:{:5f}, y:{:5f}, z:{:5f}, w:{:5f}"
+    print(quaternion_msg.format(quaternion[0], quaternion[1], quaternion[2], quaternion[3]))
 
     # rospy.loginfo("Quaternion: %s" % quaternion)
 

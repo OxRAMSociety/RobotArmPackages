@@ -1,5 +1,5 @@
 #Goal
-float64 target
+std_msgs/Float64MultiArray target
 ---
 #Result
 bool success

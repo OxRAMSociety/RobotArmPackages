@@ -1,7 +1,8 @@
 #! /usr/bin/env python3
 
 # ToDo:
-    # Look for a way to give a pointing direction of the hand (i.e. downward) without giving a quaternion and forcing it into a certain rotation in that direction
+    # Fix hand ending up wonky in simulation (the flat parts point diagonally when closing not vertiaclly) (unless this is how the robot is designed??)
+    # Find a way to only specify a pointing direction without a full orientation to give the planning alorithm the most freedom of angles to pick up the piece
     # Add capability to add a chess piece into the scene and pick and place it avoiding the area where other pieces may be 
         # This will be most easily done by:
             # 1. Adding the piece to the environment
@@ -28,6 +29,8 @@
     #   or are boxes also used to represent obstructions in the scene for object avoidance?
     # With the current code I think only 1 box can be created as its data is stored in single vairbales 
     #   e.g. self.box_name so if a new box is added this is overwritten
+    # New code has been added to implement meshes but this can easily be adapted to make multiple boxes if needed
+    # Would be useful to have a variable to store all the current collition objects in so we know what they are
 
     # Error when using pose and position goal:
     #   Got a callback on a goalHandle that we're not tracking.
@@ -275,12 +278,23 @@ class robotMoveitCommander:
 
     def execute_hand_goal(self, hand_target):
         # Function to execute a hand movement when provided with a goal
-        # Input: hand_target - an float from 0 to 1.5 radians
+        # Input: hand_target - std_msgs/Float64MultiArray of length 1 or 2 either specifying a single value to be used for each finger or a seperate value for the left and right respectively
+        # The range of values that the finger joints can take is 0 to 1.5707
+
 
         # Store the current hand joint values incase some of the joint targets are left blank, then the hand wont move
         hand_goal = self.hand.get_current_joint_values()
-        # Update only the first joint value to the target
-        hand_goal[0] = hand_target
+        # Check if one or two values were provided
+        inputs = len(hand_target.data)
+        if inputs == 2:
+            # If 2 inputs were given set the left finger to the first and the right finger to the second
+            hand_goal[0] = hand_target.data[0]
+            hand_goal[2] = hand_target.data[1]
+        else:
+            # If 1 input was given set both fingers to this value
+            hand_goal[0] = hand_target.data[0]
+            hand_goal[2] = hand_target.data[0]
+        # The robot is defined so that the other two joints in each finger mimic (copy the same value as) the first joint of that finger (which happen to be at indexes 0 and 2), hence only 2 values need to be changed in the goal and the others are irrelevant. 
         # Log the hand goal
         rospy.loginfo("Hand Goal: %s" % hand_goal)
         # Execute the movement and store the result (bool)
