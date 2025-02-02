@@ -1,0 +1,8 @@
+#Goal
+std_msgs/Float64MultiArray target
+---
+#Result
+bool success
+---
+#Feedback
+float64 error

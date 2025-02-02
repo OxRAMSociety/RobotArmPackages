@@ -1,13 +1,37 @@
 #! /usr/bin/env python3
 
-# Questions:
-    # Why do we need acceleration and velocity scaling factors? (I havent done the query_acc_vel function as I dont know why its needed)
-        # Look up what the set_max_acceleration_scaling_factor() function does and velocity
+# ToDo:
+    # Write a function that converts from the distance between the hands grippers and the gripper joint values so that the grasp width can be the input not the meaningless joint value.
+    # Fix hand ending up wonky in simulation (the flat parts point diagonally when closing not vertiaclly) (unless this is how the robot is designed??)
+    # Find a way to only specify a pointing direction without a full orientation to give the planning alorithm the most freedom of angles to pick up the piece
+    # Add capability to add a chess piece into the scene and pick and place it avoiding the area where other pieces may be 
+        # This will be most easily done by:
+            # 1. Adding the piece to the environment
+            # 2. Moving to directly above the piece while staing out of the region where peices may be (a certain height above the board)
+            # 3. Move down, pick up the piece, and move back up out of the region where pieces may be
+            # 4. Move to directly above where we want to place the piece 
+            # 5. Move vertically downwards until almost touching the board with the bottom of the piece but not quite 
+            #       (this avoids the arm trying to push the piece into the board if measurements are slightly off), 
+            #       then drop the piece (hopefully it wont fall over if its only a mm or 2 above the board)
+            # 6. Then move the arm back up and send it back to a home position to allow the other player to make their turn
+    # Add capability for the arm to take another piece
+        # Possibilities to do this:
+            # 1. Pick up the oppositions piece and place it off the board before moving your piece onto the square
+            # 2. Move your piece next to the square and then pick up their piece and move your piece onto the middle of the square after (may not be possible if pieces are close together)
+            # 3. Move your piece next to the oppositions piece and push their piece out of the way without letting go then drop your piece once in the middle of the square 
+            #       and then pick up their piece and place it off the board. (This is most realistic but may cause problems with knocking over pieces and not having enough space)
+    # Add a region where the used pieces will go so that if our pawn reaches the other side we know where to pick our queen (or other piece) up from to place it on the board
+    #   also there should be a backup in the state machine to tell the opponent to place our queen back on the board if we cant find it.
+    # Avoid torque heavy positions i.e. having the arm horizontal as the motor will likely fail
+
+# Notes:
 
     # Are the boxes only used to attach chess pieces to the robot hand when they are being moved 
     #   or are boxes also used to represent obstructions in the scene for object avoidance?
     # With the current code I think only 1 box can be created as its data is stored in single vairbales 
     #   e.g. self.box_name so if a new box is added this is overwritten
+    # New code has been added to implement meshes but this can easily be adapted to make multiple boxes if needed
+    # Would be useful to have a variable to store all the current collition objects in so we know what they are
 
     # Error when using pose and position goal:
     #   Got a callback on a goalHandle that we're not tracking.
@@ -16,11 +40,15 @@
     # I looked it up and a website said it may be becuase multiple clients are trying to use the server at the same 
     #   time however this shouldnt be the case with how I was using the code
 
-    # What more needs to be added, this is up to date with the previous version (except quer_acc_vel)
-
-# Notes:
     # Currently the script assumes all data is proveded as moveit wants it (e.g. assumes joint goals are given in radians)
     #   this can be changed once I know what format the goals will be given in
+
+    # The commander outputs values for joint angles to the robot in multiple waypoints to create the path. 
+    #   These joint angles are given relative to the robot in its vertically upward home position.
+
+    # Home pose of robot:
+    # Position: x = 0.0000, y = -0.0000, z = 0.7171
+    # Orientation (quaternion): x = 0.6936, y = 0.1380, z = -0.6934, w = 0.1379
 
 # This script sets up an action server for motion planing using moveit
 
@@ -34,6 +62,9 @@ from actionlib import SimpleActionServer
 from rbx1_motion_planning.msg import executeJointGoalAction, executeJointGoalFeedback, executeJointGoalResult, executeJointGoalGoal #executeJointGoalGoal only needed for testing
 from rbx1_motion_planning.msg import executePoseGoalAction, executePoseGoalFeedback, executePoseGoalResult, executePoseGoalGoal #executePoseGoalGoal only needed for testing
 from rbx1_motion_planning.msg import executePositionGoalAction, executePositionGoalFeedback, executePositionGoalResult, executePositionGoalGoal #executePositionGoalGoal only needed for testing
+from rbx1_motion_planning.msg import executeHandGoalAction, executeHandGoalFeedback, executeHandGoalResult, executeHandGoalGoal #executeHandGoalGoal only needed for testing
+from rbx1_motion_planning.msg import attachObjectAction, attachObjectFeedback, attachObjectResult, attachObjectGoal #attachObjectGoal only needed for testing
+from rbx1_motion_planning.msg import detachObjectAction, detachObjectFeedback, detachObjectResult, detachObjectGoal #detachObjectGoal only needed for testing
 
 class robotMoveitCommander:
     # class containting the different ros nodes used to plan the motion given different inputs
@@ -85,6 +116,43 @@ class robotMoveitCommander:
         # Start the position goal action server
         self.executePositionGoal_as = SimpleActionServer("executePositionGoal_as", executePositionGoalAction, execute_cb = self.executePositionGoal_cb, auto_start=False)
         self.executePositionGoal_as.start()
+        # Start the hand goal action server
+        self.executeHandGoal_as = SimpleActionServer("executeHandGoal_as", executeHandGoalAction, execute_cb = self.executeHandGoal_cb, auto_start=False)
+        self.executeHandGoal_as.start()
+        # Start the attach object action server
+        self.attachObject_as = SimpleActionServer("attachObject_as", attachObjectAction, execute_cb = self.attachObject_cb, auto_start=False)
+        self.attachObject_as.start()
+        # Start the detach object action server
+        self.detachObject_as = SimpleActionServer("detachObject_as", detachObjectAction, execute_cb = self.detachObject_cb, auto_start=False)
+        self.detachObject_as.start()
+
+    def query_acc_vel(self):
+        # Prompts the user for the max acceleration and velocity scaling factors
+        # (These factors are used to scale down all acceleration and velocities that the robot will experience making it slower but more accurate, 
+        #  e.g. if the robots motors allow it to have a maximum acceleration possible of 2m/s^2 and we set the scaling factor to 0.5 then we are 
+        #  limiting the acceleration to a maximumm of 1m/s^2 so if we try to make the robot accelerate as fast as possible it will only be at 1m/s^2 
+        #  acceleration. The value doesnt just scale down the maximum as this would cause wrong motion, it scales all values that are provided,
+        #  e.g. if we ask the robot to move with half acceleration it will be 0.5m/s^2 which is half of our scaled maximum.)
+
+        # Ask the user to input their dersired max acceleration scaling factor
+        a_scale = float(input("Max. Acceleration Scaling Factor? (0.1<=a<=1): "))
+        # Ensure that the scaling factor is in the range 0.1 - 1 as any other values are unreasonable
+        if a_scale < 0.1:
+            a_scale = 0.1
+        elif a_scale > 1:
+            a_scale = 1
+        # Set the chosen value in the arm settings
+        self.arm.set_max_acceleration_scaling_factor(a_scale)
+
+        # Ask the user to input their dersired max velocity scaling factor
+        v_scale = float(input("Max. Velocity Scaling Factor? (0.1<=v<=1): "))
+        # Ensure that the scaling factor is in the range 0.1 - 1 as any other values are unreasonable
+        if v_scale < 0.1:
+            v_scale = 0.1
+        elif v_scale > 1:
+            v_scale = 1
+        # Set the chosen value in the arm settings
+        self.arm.set_max_velocity_scaling_factor(v_scale)
 
     def execute_joint_goal(self, joint_target):
         # Function to execute a movement when provided with a joint goal
@@ -209,6 +277,54 @@ class robotMoveitCommander:
             # Set the result of the action server to be aborted (use executePositionGoalResult() so that the result is structured as ros wants it)
             self.executePositionGoal_as.set_aborted(executePositionGoalResult(result))
 
+    def execute_hand_goal(self, hand_target):
+        # Function to execute a hand movement when provided with a goal
+        # Input: hand_target - std_msgs/Float64MultiArray of length 1 or 2 either specifying a single value to be used for each finger or a seperate value for the left and right respectively
+        # The range of values that the finger joints can take is 0 to 1.5707
+
+
+        # Store the current hand joint values incase some of the joint targets are left blank, then the hand wont move
+        hand_goal = self.hand.get_current_joint_values()
+        # Check if one or two values were provided
+        inputs = len(hand_target.data)
+        if inputs == 2:
+            # If 2 inputs were given set the left finger to the first and the right finger to the second
+            hand_goal[0] = hand_target.data[0]
+            hand_goal[2] = hand_target.data[1]
+        else:
+            # If 1 input was given set both fingers to this value
+            hand_goal[0] = hand_target.data[0]
+            hand_goal[2] = hand_target.data[0]
+        # The robot is defined so that the other two joints in each finger mimic (copy the same value as) the first joint of that finger (which happen to be at indexes 0 and 2), hence only 2 values need to be changed in the goal and the others are irrelevant. 
+        # Log the hand goal
+        rospy.loginfo("Hand Goal: %s" % hand_goal)
+        # Execute the movement and store the result (bool)
+        outcome = self.hand.go(hand_goal, wait=True)
+        # Call stop to ensure no residual movement
+        self.hand.stop()
+        # Return the outcome of the movement
+        return outcome
+    
+    def executeHandGoal_cb(self, goal):
+        # Callback function for the executeHandGoal action server
+
+        # Log that a hand goal is trying to be executed
+        rospy.loginfo("============ Executing Hand Goal")
+        # Store whether the movement was successful or not (bool)
+        result = self.execute_hand_goal(goal.target)
+
+        # Check if the movement was successful
+        if result:
+            # Log that it was successful
+            rospy.loginfo("SUCCESS - Executed Hand Goal!")
+            # Set the result of the action server to be successful (use executeHandGoalResult() so that the result is structured as ros wants it)
+            self.executeHandGoal_as.set_succeeded(executeHandGoalResult(result))
+        else:
+            # Log that it failed
+            rospy.loginfo("FALIURE - Hand Goal Aborted!")
+            # Set the result of the action server to be aborted (use executeHandGoalResult() so that the result is structured as ros wants it)
+            self.executeHandGoal_as.set_aborted(executeHandGoalResult(result))
+
 
     def print_state(self):
         # Function to print the current robot state
@@ -318,6 +434,58 @@ class robotMoveitCommander:
         # Wait for the box to be removed and return if it was successful 
         return self.check(box_is_attached=False, box_is_known=False, timeout=timeout)
 
+    def attachObject_cb(self, goal):
+        # Function that attaches an existing object in the scene to the end effector
+
+        rospy.loginfo("============ Attaching Object")
+
+        rospy.loginfo(goal.object_name)
+
+        # Get all objects
+        objects = self.scene.get_objects()
+
+        # See if object exists
+        if goal.object_name in objects:
+            # Store the object
+            object = objects[goal.object_name]
+            # Collisions between the box and all links in touch_links are ignored so that they can be in contact, add the links used to pick up the box to this
+            # Add the hand links to touch_links
+            touch_links = self.robot.get_link_names(group=self.hand_name)
+            
+            # Setup the attached object
+            attached_object = moveit_msgs.msg.AttachedCollisionObject()
+            rospy.loginfo("Empty attached object:")
+            rospy.loginfo(attached_object)
+            attached_object.link_name = self.eef_link
+            attached_object.object = object
+            attached_object.touch_links = touch_links
+
+            # Attach the object
+            self.scene.attach_object(attached_object)
+
+            # !!!! THERE IS CURRENTLY NO CHECK TO SEE IF THIS WORKED, A FUNCTION SIMILAR TO CHECK NEEDS TO BE ADDED FOR THIS !!!!
+            # For now the server will always return true
+            rospy.loginfo("SUCCESS - Attached Object!")
+            result = True
+            # Set the result of the action server to be successful (use attachObjectResult() so that the result is structured as ros wants it)
+            self.attachObject_as.set_succeeded(attachObjectResult(result))
+        else:
+            # Object doesnt exist so abort
+            rospy.loginfo("FALIURE - Object NOT Attached!")
+            result = False
+            self.attachObject_as.set_aborted(attachObjectResult(result))
+    
+    def detachObject_cb(self, goal):
+        # Function that detaches all objects connected to the robot
+        
+        rospy.loginfo("============ Detaching Objects")
+        
+        self.scene.remove_attached_object()
+
+        result = True
+
+        self.detachObject_as.set_succeeded(detachObjectResult(result))
+
 if __name__ == '__main__':
     # Setup moveit commander
     moveit_commander.roscpp_initialize(sys.argv)
@@ -325,6 +493,10 @@ if __name__ == '__main__':
     rospy.init_node("rbx1MotionPlanningServer", anonymous=True)
     # Create an instance of the class
     s = robotMoveitCommander()
+    # Print the current state 
+    s.print_state()
+    # Ask the user for their max acceleration and velocity scaling factors (This can later be implimented as just setting them to certain values once we know what works best)
+    s.query_acc_vel()
 
     # Testing
     # s.add_box("box", [0.075,0.075,0.075], [0,0,0.11], [0,0,0,1])

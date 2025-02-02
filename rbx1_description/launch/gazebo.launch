@@ -21,7 +21,9 @@
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
-        args="-z 0.15 -unpause -urdf -model robot -param robot_description" respawn="false" output="screen" />
+        args="-x 0.2229 -y 0.0923 -z 0.04885
+              -R 0 -P 0 -Y -1.178097
+              -unpause -urdf -model robot -param robot_description" respawn="false" output="screen"/>
 
   <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
     <param name="publish_frequency" type="double" value="30.0" />
