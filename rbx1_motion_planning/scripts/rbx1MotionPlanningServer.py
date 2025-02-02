@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 # ToDo:
+    # Write a function that converts from the distance between the hands grippers and the gripper joint values so that the grasp width can be the input not the meaningless joint value.
     # Fix hand ending up wonky in simulation (the flat parts point diagonally when closing not vertiaclly) (unless this is how the robot is designed??)
     # Find a way to only specify a pointing direction without a full orientation to give the planning alorithm the most freedom of angles to pick up the piece
     # Add capability to add a chess piece into the scene and pick and place it avoiding the area where other pieces may be 

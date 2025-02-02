@@ -137,77 +137,38 @@ def ExecuteHandGoal(hand_goal_1, hand_goal_2 = None):
 
     return result
 
+def name2coords(name):
+    # A function to convert form a square name such as 'a1' to a coordinate relative to the centre of the board
+
+    # Define constants
+    board_width = 0.2 # in meters
+    square_width = board_width/8 # in meters
+
+    name = name.lower()
+    letter = name[0]
+    letter_coord = ord(letter) - 96
+    number_coord = int(name[1])
+    square_coords = np.array([letter_coord-4, number_coord-4]) # -4 is to account for the chess board being defined by its centre coordinates
+    relative_coords = (square_coords-0.5) * square_width # -0.5 to get the middle of the square from the top right corner
+    return relative_coords
+
 if __name__ == '__main__':
-    rospy.init_node('TestPickAndPlaceNode')
+    rospy.init_node('TestUserInputNode')
 
     result = detach_object()
     rospy.loginfo("Detach Result Received: %s", result)
 
-    rospy.sleep(0.5)
+    print("Type the square name. To end the program type end")
 
-    pose_goal = [0.22 + 0.0875, 
-                 -0.0625,
-                 0.15, 0, 0, 0, 0]
-    pose_goal[3:7] = quaternion_about_axis(0,[0,0,-1])
-    result = ExecutePoseGoal(pose_goal)
-    rospy.loginfo("Move Above Result Received: %s", result)
+    while True:
+        user_input_1 = input("Enter the square the piece is currently on: ") 
+        user_input_2 = input("Enter the square to move to: ")
+        if (user_input_1 == "End") | (user_input_1 == "end") | (user_input_1 == "END"):
+            break
+        elif len(user_input_1) == 2:
+            relative_coords_1 = name2coords(user_input_1)
+            
 
-    rospy.sleep(0.5)
 
-    pose_goal = [0.22 + 0.0875, 
-                 -0.0625,
-                 0.10, 0, 0, 0, 0]
-    pose_goal[3:7] = quaternion_about_axis(pi/4,[0,0,-1])
-    result = ExecutePoseGoal(pose_goal)
-    rospy.loginfo("Move Down Result Received: %s", result)
 
-    rospy.sleep(0.5)
 
-    result = ExecuteHandGoal(0.5)
-    rospy.loginfo("Grasp Result Received: %s", result)
-
-    # rospy.sleep(0.5)
-
-    # result = attach_object("black_pawn_1")
-    # rospy.loginfo("Attach Result Received: %s", result)
-
-    # rospy.sleep(0.5)
-
-    # pose_goal = [0.22 + 0.0875, 
-    #              -0.0625,
-    #              0.15, 0, 0, 0, 0]
-    # pose_goal[3:7] = quaternion_about_axis(pi/4, [0,0,-1])
-    # result = ExecutePoseGoal(pose_goal)
-    # rospy.loginfo("Move Up Result Received: %s", result)
-
-    # rospy.sleep(0.5)
-
-    # pose_goal = [0.22 + 0.0875, 
-    #              -0.0125,
-    #              0.15, 0, 0, 0, 0]
-    # pose_goal[3:7] = quaternion_about_axis(0, [0,0,-1])
-    # result = ExecutePoseGoal(pose_goal)
-    # rospy.loginfo("Move Across Result Received: %s", result)
-
-    # rospy.sleep(0.5)
-
-    # pose_goal = [0.22 + 0.0875, 
-    #              -0.0125,
-    #              0.10, 0, 0, 0, 0]
-    # pose_goal[3:7] = quaternion_about_axis(pi/2,[0,0,-1])
-    # result = ExecutePoseGoal(pose_goal)
-    # rospy.loginfo("Move Down Result Received: %s", result)
-
-    # rospy.sleep(0.5)
-
-    # result = detach_object()
-    # rospy.loginfo("Detach Result Received: %s", result)
-
-    # rospy.sleep(0.5)
-    
-    # pose_goal = [0.22 + 0.0875, 
-    #              -0.0125,
-    #              0.15, 0, 0, 0, 0]
-    # pose_goal[3:7] = quaternion_about_axis(0, [0,0,-1])
-    # result = ExecutePoseGoal()
-    # rospy.loginfo("Move Up Result Received: %s", result)
