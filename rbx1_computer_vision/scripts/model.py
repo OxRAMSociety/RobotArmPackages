@@ -4,7 +4,7 @@ import yaml
 from ultralytics import YOLO
 
 #Export dataset
-rf = Roboflow(api_key="JVNLS22ADGXG7rbkizyj")
+rf = Roboflow(api_key="")
 project = rf.workspace("oxarm-dnsiz").project("oxarm")
 dataset = project.version(2).download("yolov8-obb")
 
